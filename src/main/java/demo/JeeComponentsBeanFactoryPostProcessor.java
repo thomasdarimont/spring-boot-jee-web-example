@@ -66,22 +66,24 @@ class JeeComponentsBeanFactoryPostProcessor implements BeanFactoryPostProcessor 
 	}
 
 	private void registerJeeComponents(ConfigurableListableBeanFactory beanFactory, ClassLoader cl,
-			Set<BeanDefinition> candiates) throws LinkageError {
+			Set<BeanDefinition> candiates) {
+
 		for (BeanDefinition bd : candiates) {
 
 			try {
-
 				Class<?> beanClass = ClassUtils.forName(bd.getBeanClassName(), cl);
 				WebServlet webServlet = beanClass.getDeclaredAnnotation(WebServlet.class);
 				WebFilter webFilter = beanClass.getDeclaredAnnotation(WebFilter.class);
 				WebListener webListener = beanClass.getDeclaredAnnotation(WebListener.class);
 
+				DefaultListableBeanFactory targetBeanFactory = (DefaultListableBeanFactory) beanFactory;
+
 				if (webServlet != null) {
-					createAndRegisterServletBean((DefaultListableBeanFactory) beanFactory, bd, beanClass, webServlet);
+					createAndRegisterServletBean(targetBeanFactory, bd, beanClass, webServlet);
 				} else if (webFilter != null) {
-					createAndRegisterServletFilterBean((DefaultListableBeanFactory) beanFactory, bd, beanClass, webFilter);
+					createAndRegisterServletFilterBean(targetBeanFactory, bd, beanClass, webFilter);
 				} else if (webListener != null) {
-					createAndRegisterWebListenerBean((DefaultListableBeanFactory) beanFactory, bd, beanClass, webListener);
+					createAndRegisterWebListenerBean(targetBeanFactory, bd, beanClass, webListener);
 				}
 
 			} catch (ClassNotFoundException e) {
